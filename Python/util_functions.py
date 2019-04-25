@@ -137,7 +137,7 @@ def node_label(subgraph):
     # an implementation of the proposed double-radius node labeling (DRNL)
     K = subgraph.shape[0]
     subgraph_wo0 = subgraph[1:, 1:]
-    subgraph_wo1 = subgraph[[0]+range(2, K), :][:, [0]+range(2, K)]
+    subgraph_wo1 = subgraph[[0]+list(range(2, K)), :][:, [0]+list(range(2, K))]
     dist_to_0 = ssp.csgraph.shortest_path(subgraph_wo0, directed=False, unweighted=True)
     dist_to_0 = dist_to_0[1:, 0]
     dist_to_1 = ssp.csgraph.shortest_path(subgraph_wo1, directed=False, unweighted=True)
