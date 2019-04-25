@@ -3,8 +3,8 @@ import numpy as np
 import random
 from tqdm import tqdm
 import os, sys, pdb, math
-import cPickle as cp
-#import _pickle as cp  # python3 compatability
+# import cPickle as cp
+import _pickle as cp  # python3 compatability
 import networkx as nx
 import argparse
 import scipy.io as sio

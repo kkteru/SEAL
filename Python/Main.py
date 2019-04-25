@@ -1,7 +1,11 @@
 import torch
 import numpy as np
-import sys, copy, math, time, pdb
-import cPickle as pickle
+import sys
+import copy
+import math
+import time
+import pdb
+import _pickle as pickle
 import scipy.io as sio
 import scipy.sparse as ssp
 import os.path
@@ -17,7 +21,7 @@ parser = argparse.ArgumentParser(description='Link Prediction with SEAL')
 parser.add_argument('--data-name', default='USAir', help='network name')
 parser.add_argument('--train-name', default=None, help='train name')
 parser.add_argument('--test-name', default=None, help='test name')
-parser.add_argument('--max-train-num', type=int, default=100000, 
+parser.add_argument('--max-train-num', type=int, default=100000,
                     help='set maximum number of train links (to fit into memory)')
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
@@ -26,10 +30,10 @@ parser.add_argument('--seed', type=int, default=1, metavar='S',
 parser.add_argument('--test-ratio', type=float, default=0.1,
                     help='ratio of test links')
 # model settings
-parser.add_argument('--hop', default=1, metavar='S', 
+parser.add_argument('--hop', default=1, metavar='S',
                     help='enclosing subgraph hop number, \
                     options: 1, 2,..., "auto"')
-parser.add_argument('--max-nodes-per-hop', default=None, 
+parser.add_argument('--max-nodes-per-hop', default=None,
                     help='if > 0, upper bound the # nodes per hop by subsampling')
 parser.add_argument('--use-embedding', action='store_true', default=False,
                     help='whether to use node2vec node embeddings')
@@ -59,7 +63,7 @@ if args.train_name is None:
     args.data_dir = os.path.join(args.file_dir, 'data/{}.mat'.format(args.data_name))
     data = sio.loadmat(args.data_dir)
     net = data['net']
-    if data.has_key('group'):
+    if 'group' in data.keys():
         # load node attributes (here a.k.a. node classes)
         attributes = data['group'].toarray().astype('float32')
     else:
@@ -68,7 +72,7 @@ if args.train_name is None:
     if False:
         net_ = net.toarray()
         assert(np.allclose(net_, net_.T, atol=1e-8))
-    #Sample train and test links
+    # Sample train and test links
     train_pos, train_neg, test_pos, test_neg = sample_neg(net, args.test_ratio, max_train_num=args.max_train_num)
 else:
     args.train_dir = os.path.join(args.file_dir, 'data/{}'.format(args.train_name))
@@ -76,10 +80,10 @@ else:
     train_idx = np.loadtxt(args.train_dir, dtype=int)
     test_idx = np.loadtxt(args.test_dir, dtype=int)
     max_idx = max(np.max(train_idx), np.max(test_idx))
-    net = ssp.csc_matrix((np.ones(len(train_idx)), (train_idx[:, 0], train_idx[:, 1])), shape=(max_idx+1, max_idx+1))
+    net = ssp.csc_matrix((np.ones(len(train_idx)), (train_idx[:, 0], train_idx[:, 1])), shape=(max_idx + 1, max_idx + 1))
     net[train_idx[:, 1], train_idx[:, 0]] = 1  # add symmetric edges
-    net[np.arange(max_idx+1), np.arange(max_idx+1)] = 0  # remove self-loops
-    #Sample negative train and test links
+    net[np.arange(max_idx + 1), np.arange(max_idx + 1)] = 0  # remove self-loops
+    # Sample negative train and test links
     train_pos = (train_idx[:, 0], train_idx[:, 1])
     test_pos = (test_idx[:, 0], test_idx[:, 1])
     train_pos, train_neg, test_pos, test_neg = sample_neg(net, train_pos=train_pos, test_pos=test_pos, max_train_num=args.max_train_num)
@@ -154,4 +158,3 @@ with open('acc_results.txt', 'a+') as f:
 if cmd_args.printAUC:
     with open('auc_results.txt', 'a+') as f:
         f.write(str(test_loss[2]) + '\n')
-
